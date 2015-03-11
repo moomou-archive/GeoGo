@@ -8,7 +8,7 @@ with a user specified unique identifier that maps to other services.
 
 For example, say you run a social network where every user has an opaque user id.
 
-You can use GEOGO to store latitude and longitude information for each user id to finder users
+You can use GEOGO to store latitude and longitude information for each user id and use GEOGO to find users
 near each other.
 
 Listens on port 3003.
