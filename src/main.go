@@ -15,7 +15,7 @@ func main() {
 	})
 
 	log.Println("Server listening on port 3003")
-	err := http.ListenAndServe("localhost:3003", nil)
+	err := http.ListenAndServe(":3003", nil)
 
 	if err != nil {
 		log.Println(err)
