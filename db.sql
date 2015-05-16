@@ -3,6 +3,8 @@ CREATE SCHEMA "qon";
 DROP TABLE IF EXISTS "qon"."app";
 DROP TABLE IF EXISTS "qon"."trigger";
 
+-- CREATE EXTENSION POSTGIS
+
 -- App Table
 -- CREATE TABLE "qon"."app" (
 --    "app_id" CHARACTER(128) PRIMARY KEY

@@ -2,8 +2,9 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
-	//"log"
+	"os"
 )
 
 const (
@@ -27,7 +28,22 @@ func (this *InvalidRequest) Error() string {
 }
 
 func getDBConnection() *sql.DB {
-	db, err := sql.Open("postgres", "sslmode=disable port=5432 host=localhost")
+	dbName := os.Getenv("DB")
+	host := os.Getenv("HOST")
+	port := os.Getenv("PORT")
+	pwd := os.Getenv("PASSWORD")
+	user := os.Getenv("USER")
+
+	if port == "" {
+		port = "5432"
+	}
+	if host == "" {
+		host = "localhost"
+	}
+
+	connectUrl := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user, pwd, host, port, dbName)
+	db, err := sql.Open("postgres", connectUrl)
 
 	if err != nil {
 		panic(err)

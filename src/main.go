@@ -10,8 +10,8 @@ func main() {
 
 	http.HandleFunc("/trigger", makeTriggerHandlers(db))
 
-	http.HandleFunc("/__ding__", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("dong\n"))
+	http.HandleFunc("/__ping__", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("pong\n"))
 	})
 
 	log.Println("Server listening on port 3003")

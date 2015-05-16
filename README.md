@@ -15,7 +15,11 @@ Listens on port 3003.
 
 Dependencies
 ============
-Uses Postgres database for geolocation. Schema is located in db.sql.
+Uses Postgres + PostGIS database for geolocation. Schema is located in db.sql.
+
+If you are on Mac, http://postgresapp.com/ is the easiest way to get started with PostGIS already installed.
+
+Otherwise, checkout http://postgis.net/install for installation instructions.
 
 Methods
 =====
