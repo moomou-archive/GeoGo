@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"log"
 	"strconv"
 	"strings"
@@ -15,22 +15,26 @@ type Trigger struct {
 }
 
 type trigger struct {
-	AppId      string    `json:"appId"`
-	Identifier string    `json:"identifier"`
-	CreatedAt  time.Time `json:"createdAt"`
-	ExpiresAt  time.Time `json:"expiresAt"`
-	Coords     []string  `json:"coords"` //lat, lon
+	AppId      string     `json:"appId"`
+	Identifier string     `json:"identifier"`
+	CreatedAt  *time.Time `json:"createdAt"`
+	ExpiresAt  *time.Time `json:"expiresAt"`
+	Coords     []string   `json:"coords"` //lat, lon
 }
 
 func (t *Trigger) add(triggers *[]trigger) error {
 	query := `INSERT INTO qon.trigger (app_id, identifier, coords, expires_at) VALUES `
 
 	for _, v := range *triggers {
-		query += fmt.Sprintf(`('%s', '%s', ST_GeographyFromText('SRID=4326;POINT(%s)'), '%s')`,
+		expiresAt := "NULL"
+		if v.ExpiresAt != nil {
+			expiresAt = fmt.Sprintf(`'%s'`, v.ExpiresAt.Format(time.RFC3339))
+		}
+		query += fmt.Sprintf(`('%s', '%s', ST_GeographyFromText('SRID=4326;POINT(%s)'), %s)`,
 			strings.TrimSpace(v.AppId),
 			strings.TrimSpace(v.Identifier),
 			fmt.Sprintf("%s %s", strings.TrimSpace(v.Coords[1]), strings.TrimSpace(v.Coords[0])),
-			v.ExpiresAt.Format(time.RFC3339),
+			expiresAt,
 		) + ",\n"
 	}
 
@@ -65,8 +69,7 @@ func (t *Trigger) updateIdentifier(appId string, oldIdentifier string, newIdenti
 	return nil
 }
 
-func (t *Trigger) findNearBy(triggerInfo *trigger,
-	radius int64, unit string) ([]trigger, error) {
+func (t *Trigger) findNearBy(triggerInfo *trigger, radius int64, unit string) ([]trigger, error) {
 
 	radiusMeter := radius
 
@@ -92,8 +95,8 @@ func (t *Trigger) findNearBy(triggerInfo *trigger,
                 Geography(ST_MakePoint($1, $2)),
                 $3
             )
-            AND (date_trunc('hour', expires_at) = date_trunc('hour', TIMESTAMP 'epoch')
-                 OR expires_at >= 'now()')
+            AND (expires_at IS NULL OR expires_at >= 'now()' OR
+			     date_trunc('hour', expires_at) = date_trunc('hour', TIMESTAMP 'epoch'))
             AND app_id = $4
         `
 	// Optinally filter for a specific item.
@@ -121,12 +124,14 @@ func (t *Trigger) findNearBy(triggerInfo *trigger,
 	}
 
 	var (
-		appId      string
-		identifier string
-		lat        string
-		lon        string
-		createdAt  time.Time
-		expiresAt  time.Time
+		appId       string
+		identifier  string
+		lat         string
+		lon         string
+		createdAt   *time.Time
+		expiresAt   *time.Time
+		ntCreatedAt pq.NullTime
+		ntExpiresAt pq.NullTime
 	)
 
 	resultTrigger := make([]trigger, 100)[1:2]
@@ -135,13 +140,25 @@ func (t *Trigger) findNearBy(triggerInfo *trigger,
 
 	for rows.Next() {
 		// internal always lon = ST_X, lat = ST_Y
-		err := rows.Scan(&appId, &identifier, &lon, &lat, &createdAt, &expiresAt)
+		err := rows.Scan(&appId, &identifier, &lon, &lat, &ntCreatedAt, &ntExpiresAt)
 
 		// external coords always lat and lon, in that order
 		coords = []string{lat, lon}
 
 		if err != nil {
 			return nil, err
+		}
+
+		if ntCreatedAt.Valid {
+			createdAt = &ntCreatedAt.Time
+		} else {
+			createdAt = nil
+		}
+
+		if ntExpiresAt.Valid {
+			expiresAt = &ntExpiresAt.Time
+		} else {
+			expiresAt = nil
 		}
 
 		resultTrigger = append(resultTrigger, trigger{

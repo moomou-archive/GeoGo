@@ -18,7 +18,7 @@ CREATE TABLE "qon"."trigger" (
     "coords" GEOGRAPHY (POINT, 4326) NOT NULL,
     "trigger_at" TIMESTAMP DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'utc'),
     "created_at" TIMESTAMP DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'utc'),
-    "expires_at" TIMESTAMP DEFAULT 'epoch' -- not using interval b
+    "expires_at" TIMESTAMP DEFAULT NULL -- not using interval b
 );
 
 -- Create spatial index

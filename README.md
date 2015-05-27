@@ -26,15 +26,17 @@ Methods
 GET: Returns a list of ids near the lat lon within the radius.
 /trigger?lat=x&lon=y&radius=z&unit=m|meter
 
-POST: Add a list of ids to the geolocation
-/trigger?lat=x&lon=y
-{
-    ids: [1, 2, 3]
-}
-
 DELETE: Remove a list of ids from the geolocation
-/trigger?lat=x&lon=y&ids=[x,y,z]
+/trigger?ids=[x,y,z]
 
-Note
-====
-First ever Go project :)
+POST: Add a list of ids to the geolocation
+/trigger
+    [
+        {
+            expiresAt: `null` or string - ISOString8601 of the expire time
+            identifier: string - object id,
+            appId: string - identifies application,
+            coords: array - [latitude, longitude]
+        },
+        ...
+    ]
