@@ -31,6 +31,7 @@ DELETE: Remove a list of ids from the geolocation
 
 POST: Add a list of ids to the geolocation
 /trigger
+
     [
         {
             expiresAt: `null` or string - ISOString8601 of the expire time
