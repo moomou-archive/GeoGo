@@ -27,9 +27,9 @@ GET: Returns a list of ids near the lat lon within the radius.
 
 /trigger?lat=x&lon=y&radius=z&unit=m|meter
 
-DELETE: Remove a list of ids from the geolocation
+DELETE: Remove an object from the db
 
-/trigger?ids=[x,y,z]
+/trigger?appId=yourId&identifier=objectId
 
 POST: Add a list of ids to the geolocation
 
